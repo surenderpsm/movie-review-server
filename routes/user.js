@@ -8,7 +8,10 @@ import {
   updatePreferredGenres,
   toggleFavorite,
   searchUsers,
-  getFeedForLoggedInUser, getFeedForAnonymousUser
+  getFeedForLoggedInUser,
+  getFeedForAnonymousUser,
+  updateUsername,
+  updatePassword
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -20,6 +23,9 @@ router.get('/search', searchUsers);
 router.get('/:id', getProfile);
 router.put('/me', protect, updateProfile);
 router.put('/genres', protect, updatePreferredGenres);
+// New routes for username and password updates
+router.put('/username', protect, updateUsername);
+router.put('/password', protect, updatePassword);
 router.post('/favorites', protect, toggleFavorite);
 router.post('/follow/:id', protect, followUser);
 router.post('/unfollow/:id', protect, unfollowUser);

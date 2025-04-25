@@ -159,3 +159,61 @@ export const searchUsers = async (req, res) => {
   }
 };
 
+// Update username
+export const updateUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username || username.trim() === '') {
+      return res.status(400).json({ error: 'Username cannot be empty' });
+    }
+
+    // Check if username is already taken
+    const existingUser = await User.findOne({ username, _id: { $ne: req.user.id } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username is already taken' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user.id,
+        { username },
+        { new: true }
+    ).select('-password');
+
+    res.json({ message: 'Username updated successfully', user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+import bcrypt from 'bcryptjs'; // Make sure this is imported at the top of your file
+
+// Update password
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Both current and new password are required' });
+    }
+
+    // Get user with password (don't exclude password field)
+    const user = await User.findById(req.user.id);
+
+    // Check if current password is correct - manually compare with bcrypt
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
