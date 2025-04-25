@@ -72,9 +72,9 @@ export const unfollowUser = async (req, res) => {
 };
 
 
-export const getFeed = async (req, res) => {
+// Route for logged-in users: fetch reviews from people they follow
+export const getFeedForLoggedInUser = async (req, res) => {
   try {
-
     const me = await User.findById(req.user.id);
 
     const feed = await Review.find({ user: { $in: me.following } })
@@ -84,7 +84,22 @@ export const getFeed = async (req, res) => {
 
     res.json(feed);
   } catch (err) {
-    console.error('[getFeed]', err);
+    console.error('[getFeedForLoggedInUser]', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Route for anonymous users: fetch all reviews
+export const getFeedForAnonymousUser = async (req, res) => {
+  try {
+    const feed = await Review.find()
+    .sort({ createdAt: -1 })
+    .limit(10)
+    .populate('user', 'username');
+
+    res.json(feed);
+  } catch (err) {
+    console.error('[getFeedForAnonymousUser]', err);
     res.status(500).json({ error: err.message });
   }
 };

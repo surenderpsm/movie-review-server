@@ -4,12 +4,17 @@ import {
   getProfile,
   updateProfile,
   followUser,
-  unfollowUser, getFeed, updatePreferredGenres, toggleFavorite, searchUsers
+  unfollowUser,
+  updatePreferredGenres,
+  toggleFavorite,
+  searchUsers,
+  getFeedForLoggedInUser, getFeedForAnonymousUser
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-router.get('/feed', protect, getFeed);
+router.get('/feed', protect, getFeedForLoggedInUser);
+router.get('/feed/all', getFeedForAnonymousUser);
 router.get('/me', protect, getMe);
 router.get('/search', searchUsers);
 router.get('/:id', getProfile);
