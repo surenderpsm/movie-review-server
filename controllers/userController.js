@@ -121,3 +121,26 @@ export const toggleFavorite = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim() === '') {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } }
+      ]
+    }).select('username'); // Return only public fields
+
+    res.json(users);
+  } catch (err) {
+    console.error('[searchUsers]', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
